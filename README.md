@@ -120,3 +120,9 @@ python pipeline.py
 ├── material_metadata.json  # Raw material attributes (lead times, etc.)
 └── models/              # Saved GBDT models per material (*_baseline.pkl)
 ```
+
+---
+
+## ⚡ Backend Integration Guide
+
+For detailed guidelines on how to integrate the machine learning forecasting models and mathematical inventory logic into your web application backend, refer to the **[backend.md](file:///home/shaikafnan/cs756/backend.md)** document. It contains the exact function signatures, database schema guidelines, and a complete mock FastAPI implementation.
