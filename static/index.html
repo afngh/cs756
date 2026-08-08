@@ -3,219 +3,481 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Replenishment Health Dashboard | CS2026-756</title>
-    <!-- Modern Typography -->
+    <title>Zoho Inventory | CS2026 Manufacturing Hub</title>
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    <!-- Chart.js for visualization -->
+    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <div class="app-container">
-        <!-- Top Header Navigation -->
-        <header class="app-header">
-            <div class="header-left">
-                <div class="logo-badge">
-                    <span class="logo-icon">📦</span>
+<body class="zoho-theme">
+    <!-- Top Zoho Header Bar -->
+    <header class="zoho-header">
+        <div class="header-left">
+            <div class="zoho-brand">
+                <span class="zoho-logo-icon">Z</span>
+                <div class="brand-text">
+                    <span class="brand-name">zoho <span class="brand-sub">Inventory</span></span>
                 </div>
-                <div>
-                    <h1 class="app-title">Replenishment Health Dashboard</h1>
-                    <div class="app-subtitle">
-                        <span>CodeSprint 2026 Hackathon #167</span>
-                        <span class="dot-separator">•</span>
-                        <span>Team CS2026-756</span>
-                        <span class="dot-separator">•</span>
-                        <span>Audisankara Deemed to be University</span>
+            </div>
+            <div class="org-switcher">
+                <span class="org-icon">🏭</span>
+                <div class="org-info">
+                    <span class="org-name">CS2026 Manufacturing Hub</span>
+                    <span class="org-meta">Audisankara University • Gudur AP</span>
+                </div>
+                <span class="org-dropdown-arrow">▼</span>
+            </div>
+        </div>
+
+        <div class="header-center">
+            <div class="zoho-search-bar">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="global-search" placeholder="Search materials, forecasts, orders (Ctrl + K)...">
+                <kbd class="search-kbd">Ctrl K</kbd>
+            </div>
+        </div>
+
+        <div class="header-right">
+            <button id="btn-quick-shortage" class="btn btn-zoho-primary">
+                <span>+ Simulate Shortage</span>
+            </button>
+            <div class="notification-bell" id="notification-bell-btn" title="Stockout Risk Notifications">
+                <span class="bell-icon">🔔</span>
+                <span id="bell-badge-count" class="bell-badge">0</span>
+            </div>
+            <div class="user-avatar" title="CS2026 Team Admin">
+                <span>AU</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main SaaS Container (Sidebar + Content) -->
+    <div class="zoho-app-layout">
+        <!-- Left Sidebar Navigation -->
+        <aside class="zoho-sidebar">
+            <nav class="sidebar-nav">
+                <div class="nav-section-label">MAIN MENU</div>
+                
+                <a href="#dashboard" class="nav-item active" data-view="view-dashboard">
+                    <span class="nav-icon">📊</span>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+
+                <a href="#items" class="nav-item" data-view="view-items">
+                    <span class="nav-icon">📦</span>
+                    <span class="nav-text">Raw Materials</span>
+                    <span id="sidebar-item-count" class="nav-count">15</span>
+                </a>
+
+                <div class="nav-section-label">ML & OPTIMIZATION PIPELINE</div>
+
+                <a href="#forecasting" class="nav-item" data-view="view-forecasting">
+                    <span class="nav-icon">🤖</span>
+                    <span class="nav-text">Layer 1: ML Demand Forecast</span>
+                </a>
+
+                <a href="#optimization" class="nav-item" data-view="view-optimization">
+                    <span class="nav-icon">⚙️</span>
+                    <span class="nav-text">Layer 2: Stock Optimization</span>
+                </a>
+
+                <a href="#procurement" class="nav-item" data-view="view-procurement">
+                    <span class="nav-icon">🚨</span>
+                    <span class="nav-text">Layer 3: Alerts & Orders</span>
+                    <span id="sidebar-alert-count" class="nav-badge-high">0</span>
+                </a>
+
+                <div class="nav-section-label">SIMULATOR & SYSTEM</div>
+
+                <a href="#simulator" class="nav-item" data-view="view-simulator">
+                    <span class="nav-icon">⚡</span>
+                    <span class="nav-text">Shortage Simulator</span>
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="system-status-box">
+                    <span class="status-dot"></span>
+                    <div>
+                        <div class="status-title">Continuous Review</div>
+                        <div class="status-sub">95% Service Level</div>
                     </div>
                 </div>
             </div>
-            <div class="header-right">
-                <div class="status-indicator">
-                    <span class="pulse-dot"></span>
-                    <span class="status-text">Continuous Review Pipeline Active</span>
-                </div>
-                <button id="btn-refresh" class="btn btn-secondary">
-                    <span class="icon">🔄</span> Refresh Data
-                </button>
-            </div>
-        </header>
+        </aside>
 
-        <!-- Executive Summary KPI Cards -->
-        <section class="kpi-grid">
-            <div class="kpi-card glass">
-                <div class="kpi-icon icon-cyan">📊</div>
-                <div class="kpi-content">
-                    <span class="kpi-label">Monitored Raw Materials</span>
-                    <div id="kpi-total-mat" class="kpi-value">--</div>
-                    <span class="kpi-subtext">3-Layer Optimization Pipeline</span>
+        <!-- Main Workspace Area -->
+        <main class="zoho-content-area">
+            
+            <!-- SECTION 1: DASHBOARD VIEW -->
+            <section id="view-dashboard" class="content-view active-view">
+                <div class="view-header">
+                    <div>
+                        <h2 class="view-title">Executive Inventory Summary</h2>
+                        <p class="view-subtitle">Real-time material replenishment health & demand forecasting analytics</p>
+                    </div>
+                    <div class="view-actions">
+                        <button class="btn btn-secondary btn-refresh-data">
+                            <span>🔄 Refresh Pipeline</span>
+                        </button>
+                    </div>
                 </div>
-            </div>
-            <div class="kpi-card glass warning-glow">
-                <div class="kpi-icon icon-rose">⚠️</div>
-                <div class="kpi-content">
-                    <span class="kpi-label">High Stockout Risk Items</span>
-                    <div id="kpi-high-risk" class="kpi-value text-rose">--</div>
-                    <span class="kpi-subtext">Stock < Reorder Point (ROP)</span>
-                </div>
-            </div>
-            <div class="kpi-card glass">
-                <div class="kpi-icon icon-emerald">🛒</div>
-                <div class="kpi-content">
-                    <span class="kpi-label">Total Reorder Qty Needed</span>
-                    <div id="kpi-reorder-qty" class="kpi-value text-emerald">--</div>
-                    <span class="kpi-subtext">Optimized via EOQ Formula</span>
-                </div>
-            </div>
-            <div class="kpi-card glass">
-                <div class="kpi-icon icon-violet">🧠</div>
-                <div class="kpi-content">
-                    <span class="kpi-label">Forecasting Engine</span>
-                    <div class="kpi-value text-violet">GBDT + Lags</div>
-                    <span class="kpi-subtext">Recursive Multi-step Forecast</span>
-                </div>
-            </div>
-        </section>
 
-        <!-- Main Dashboard Actions & Filter Bar -->
-        <section class="toolbar glass">
-            <div class="toolbar-left">
-                <div class="search-box">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" id="input-search" placeholder="Search Material ID (e.g. MAT_01)...">
-                </div>
-                <div class="filter-tabs">
-                    <button class="tab-btn active" data-filter="all">All Items (<span id="count-all">0</span>)</button>
-                    <button class="tab-btn filter-high" data-filter="HIGH">High Risk (<span id="count-high">0</span>)</button>
-                    <button class="tab-btn filter-low" data-filter="LOW">Low Risk (<span id="count-low">0</span>)</button>
-                </div>
-            </div>
-            <div class="toolbar-right">
-                <button id="btn-simulate-shortage" class="btn btn-warning">
-                    <span class="icon">⚡</span> Simulate Shortage (MAT_01)
-                </button>
-                <button id="btn-reset-data" class="btn btn-ghost">
-                    <span class="icon">🎲</span> Reset Synthetic History
-                </button>
-            </div>
-        </section>
+                <!-- Zoho KPI Metrics Row -->
+                <div class="zoho-kpi-row">
+                    <div class="zoho-kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-title">TOTAL STOCK UNITS</span>
+                            <span class="kpi-icon-bg icon-blue">📦</span>
+                        </div>
+                        <div id="dash-total-stock" class="kpi-big-num">--</div>
+                        <div class="kpi-footer text-muted">Across 15 Raw Materials</div>
+                    </div>
 
-        <!-- Main Data Table Card -->
-        <main class="table-card glass">
-            <div class="table-header-bar">
-                <h2>Raw Material Replenishment Recommendations</h2>
-                <div class="timestamp-badge">
-                    <span>Last Updated: </span>
-                    <strong id="last-updated-time">--:--:--</strong>
+                    <div class="zoho-kpi-card highlight-danger">
+                        <div class="kpi-header">
+                            <span class="kpi-title">HIGH STOCKOUT RISK</span>
+                            <span class="kpi-icon-bg icon-red">⚠️</span>
+                        </div>
+                        <div id="dash-high-risk" class="kpi-big-num text-rose">--</div>
+                        <div class="kpi-footer text-rose">Stock < Reorder Point (ROP)</div>
+                    </div>
+
+                    <div class="zoho-kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-title">REORDER REQUIRED (EOQ)</span>
+                            <span class="kpi-icon-bg icon-emerald">🛒</span>
+                        </div>
+                        <div id="dash-reorder-units" class="kpi-big-num text-emerald">--</div>
+                        <div class="kpi-footer text-emerald">Units to be Procured</div>
+                    </div>
+
+                    <div class="zoho-kpi-card">
+                        <div class="kpi-header">
+                            <span class="kpi-title">AVERAGE LEAD TIME</span>
+                            <span class="kpi-icon-bg icon-purple">⏱️</span>
+                        </div>
+                        <div id="dash-avg-leadtime" class="kpi-big-num text-violet">-- days</div>
+                        <div class="kpi-footer text-muted">Continuous Review Window</div>
+                    </div>
                 </div>
-            </div>
-            <div class="table-wrapper">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            <th>Material ID</th>
-                            <th>Lead Time</th>
-                            <th>Current Stock</th>
-                            <th>Avg Daily Use</th>
-                            <th>Safety Stock ($SS$)</th>
-                            <th>Reorder Point ($ROP$)</th>
-                            <th>EOQ</th>
-                            <th>Rec. Order Qty</th>
-                            <th>Stockout Risk</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="materials-tbody">
-                        <tr>
-                            <td colspan="10" class="loading-cell">
-                                <div class="spinner"></div>
-                                <span>Loading ML Demand Forecast Pipeline...</span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
+
+                <!-- Dashboard Widgets Grid -->
+                <div class="dashboard-widgets-grid">
+                    <!-- Widget 1: Inventory Health Status Breakdown -->
+                    <div class="zoho-widget-card">
+                        <div class="widget-header">
+                            <h3>Inventory Health Distribution</h3>
+                            <span class="widget-badge">Continuous Review</span>
+                        </div>
+                        <div class="widget-body flex-center">
+                            <div class="chart-box-sm">
+                                <canvas id="healthDonutChart"></canvas>
+                            </div>
+                            <div class="donut-stats-legend">
+                                <div class="stat-legend-item">
+                                    <span class="legend-color bg-emerald"></span>
+                                    <span class="legend-label">Optimal Stock</span>
+                                    <strong id="donut-optimal-count">14</strong>
+                                </div>
+                                <div class="stat-legend-item">
+                                    <span class="legend-color bg-rose"></span>
+                                    <span class="legend-label">High Stockout Risk</span>
+                                    <strong id="donut-risk-count">1</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Widget 2: High Risk Items Alert List -->
+                    <div class="zoho-widget-card">
+                        <div class="widget-header">
+                            <h3>Action Needed: Stockout Warning Feed</h3>
+                            <button id="btn-dashboard-simulate" class="btn btn-sm btn-outline-rose">⚡ Trigger Test Shortage</button>
+                        </div>
+                        <div class="widget-body">
+                            <div id="dash-alert-feed" class="alert-feed-list">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- SECTION 2: RAW MATERIALS / ITEMS CATALOG VIEW -->
+            <section id="view-items" class="content-view">
+                <div class="view-header">
+                    <div>
+                        <h2 class="view-title">Raw Material Inventory Catalog</h2>
+                        <p class="view-subtitle">15 Simulated raw materials with Safety Stock, Reorder Point, and EOQ thresholds</p>
+                    </div>
+                    <div class="view-actions">
+                        <button class="btn btn-secondary btn-reset-synthetic">
+                            <span>🎲 Reset History</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Table Controls & Filter Bar -->
+                <div class="zoho-table-toolbar">
+                    <div class="table-search-input">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="items-table-search" placeholder="Filter by Material ID (e.g., MAT_01)...">
+                    </div>
+                    <div class="table-filter-pills">
+                        <button class="table-pill active" data-filter="all">All Items</button>
+                        <button class="table-pill pill-danger" data-filter="HIGH">High Stockout Risk</button>
+                        <button class="table-pill pill-success" data-filter="LOW">Healthy Stock</button>
+                    </div>
+                </div>
+
+                <!-- Items Table Card -->
+                <div class="zoho-card">
+                    <div class="table-responsive">
+                        <table class="zoho-table">
+                            <thead>
+                                <tr>
+                                    <th>Material ID</th>
+                                    <th>Lead Time ($L$)</th>
+                                    <th>Current Stock</th>
+                                    <th>Avg Forecast Use</th>
+                                    <th>Safety Stock ($SS$)</th>
+                                    <th>Reorder Point ($ROP$)</th>
+                                    <th>EOQ Batch</th>
+                                    <th>Rec. Order Qty</th>
+                                    <th>Stockout Risk</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="items-tbody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- SECTION 3: ML DEMAND FORECASTING (LAYER 1) -->
+            <section id="view-forecasting" class="content-view">
+                <div class="view-header">
+                    <div>
+                        <h2 class="view-title">Layer 1: Machine Learning Demand Forecasting</h2>
+                        <p class="view-subtitle">Multi-step recursive forecasting using Gradient Boosting Decision Trees (GBDT)</p>
+                    </div>
+                </div>
+
+                <div class="zoho-info-box">
+                    <div class="info-icon">🤖</div>
+                    <div>
+                        <h4>Why Autoregressive Lags & Multi-step Recursive Forecasting?</h4>
+                        <p>If a material has a lead time of 7 days, an order placed today will not arrive for 7 days. Our GBDT model creates autoregressive lags (t-1, t-7, t-14, t-30) and rolling windows (mean 7/30d, std 7d) to predict daily consumption recursively over the entire lead-time window.</p>
+                    </div>
+                </div>
+
+                <div class="zoho-card p-24 margin-top-20">
+                    <h3>Multi-Material Lead-Time Demand Predictions</h3>
+                    <p class="text-muted text-sm margin-bottom-16">Select a raw material to inspect its recursive daily forecast sequence:</p>
+                    
+                    <div class="flex-gap-12 margin-bottom-16">
+                        <select id="select-forecast-material" class="zoho-select">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+
+                    <div class="chart-wrapper-large">
+                        <canvas id="multiForecastChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- SECTION 4: STOCK OPTIMIZATION LAYER (LAYER 2) -->
+            <section id="view-optimization" class="content-view">
+                <div class="view-header">
+                    <div>
+                        <h2 class="view-title">Layer 2: Mathematical Stock Optimization</h2>
+                        <p class="view-subtitle">Mathematical formulations for Safety Stock ($SS$), Reorder Point ($ROP$), and Economic Order Quantity ($EOQ$)</p>
+                    </div>
+                </div>
+
+                <!-- Math Cards Grid -->
+                <div class="zoho-math-grid">
+                    <div class="zoho-math-card">
+                        <div class="math-badge">Safety Stock Formula</div>
+                        <h3>Safety Stock ($SS$)</h3>
+                        <div class="math-formula-box">
+                            $$SS = z \times \sigma_{90} \times \sqrt{L}$$
+                        </div>
+                        <ul class="math-bullet-list">
+                            <td><strong>$z = 1.645$</strong> (95% Service Level z-score)</td>
+                            <td><strong>$\sigma_{90}$</strong>: 90-day historical usage standard deviation</td>
+                            <td><strong>$L$</strong>: Replenishment lead time in days</td>
+                        </ul>
+                    </div>
+
+                    <div class="zoho-math-card">
+                        <div class="math-badge badge-amber">Reorder Point Formula</div>
+                        <h3>Reorder Point ($ROP$)</h3>
+                        <div class="math-formula-box">
+                            $$ROP = (\bar{d}_{\text{forecast}} \times L) + SS$$
+                        </div>
+                        <ul class="math-bullet-list">
+                            <td><strong>$\bar{d}_{\text{forecast}}$</strong>: Predicted mean daily usage from Layer 1</td>
+                            <td>Triggers purchase alert moment stock drops below $ROP$</td>
+                        </ul>
+                    </div>
+
+                    <div class="zoho-math-card">
+                        <div class="math-badge badge-emerald">Economic Order Quantity</div>
+                        <h3>Economic Order Quantity ($EOQ$)</h3>
+                        <div class="math-formula-box">
+                            $$EOQ = \sqrt{\frac{2 \times (365 \cdot \bar{d}) \times S}{H}}$$
+                        </div>
+                        <ul class="math-bullet-list">
+                            <td><strong>$S = \$50$</strong>: Fixed order procurement cost</td>
+                            <td><strong>$H = \$2$</strong>: Annual holding cost per unit</td>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- SECTION 5: ALERTS & PROCUREMENT (LAYER 3) -->
+            <section id="view-procurement" class="content-view">
+                <div class="view-header">
+                    <div>
+                        <h2 class="view-title">Layer 3: Alert & Procurement Engine</h2>
+                        <p class="view-subtitle">Automated purchase order recommendations generated for items below Reorder Point</p>
+                    </div>
+                </div>
+
+                <div class="zoho-card p-24">
+                    <div class="flex-between margin-bottom-20">
+                        <div>
+                            <h3>Pending Purchase Order Recommendations</h3>
+                            <p class="text-muted text-sm">Generated automatically when Stock &lt; ROP</p>
+                        </div>
+                        <button id="btn-generate-po-batch" class="btn btn-zoho-primary">
+                            <span>📦 Generate Purchase Orders Batch</span>
+                        </button>
+                    </div>
+
+                    <div id="po-recommendations-list">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </section>
+
+
+            <!-- SECTION 6: SHORTAGE SIMULATOR -->
+            <section id="view-simulator" class="content-view">
+                <div class="view-header">
+                    <div>
+                        <h2 class="view-title">Scenario & Shortage Simulator</h2>
+                        <p class="view-subtitle">Test supply chain disruptions, sudden demand shocks, and inventory drops in real time</p>
+                    </div>
+                </div>
+
+                <div class="zoho-card p-24 max-w-600">
+                    <form id="sim-form">
+                        <div class="form-group-zoho">
+                            <label>Target Raw Material</label>
+                            <select id="sim-mat-select" class="zoho-select">
+                                <option value="MAT_01">MAT_01 (Lead Time: 7 days)</option>
+                                <option value="MAT_02">MAT_02 (Lead Time: 3 days)</option>
+                                <option value="MAT_06">MAT_06 (Lead Time: 9 days)</option>
+                                <option value="MAT_09">MAT_09 (Lead Time: 8 days)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group-zoho">
+                            <label>Shortage Drop Ratio</label>
+                            <select id="sim-drop-pct" class="zoho-select">
+                                <option value="0.10">Severe Drop (Reduce stock to 10%)</option>
+                                <option value="0.25">Moderate Drop (Reduce stock to 25%)</option>
+                                <option value="0.50">Half Stock (Reduce stock to 50%)</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-warning full-width btn-lg">
+                            <span>⚡ Execute Stock Shock Simulation</span>
+                        </button>
+                    </form>
+                </div>
+            </section>
         </main>
     </div>
 
-    <!-- Material Details & Analytics Modal -->
-    <div id="forecast-modal" class="modal-backdrop hidden">
-        <div class="modal-content glass">
-            <div class="modal-header">
+    <!-- ZOHO RIGHT SLIDE-OVER DRAWER FOR MATERIAL DETAILS -->
+    <div id="zoho-drawer-backdrop" class="drawer-backdrop hidden">
+        <aside id="zoho-drawer" class="zoho-right-drawer">
+            <div class="drawer-header">
                 <div>
-                    <h3 id="modal-title" class="modal-title">Material Analytics & Forecast</h3>
-                    <div id="modal-subtitle" class="modal-subtitle">MAT_01 • Lead Time: 7 days</div>
+                    <div class="drawer-mat-badge" id="drawer-mat-id">MAT_01</div>
+                    <h3 class="drawer-title" id="drawer-title">Material Specification & Forecast</h3>
                 </div>
-                <button id="modal-close" class="modal-close-btn">&times;</button>
+                <button id="drawer-close-btn" class="drawer-close">&times;</button>
             </div>
-            <div class="modal-body">
-                <!-- Mathematical Formula Cards Grid -->
-                <div class="formula-cards-grid">
-                    <div class="formula-card">
-                        <div class="formula-title">Safety Stock ($SS$)</div>
-                        <div id="formula-ss-val" class="formula-val">-- units</div>
-                        <div class="formula-math">\(SS = 1.645 \times \sigma_{90} \times \sqrt{L}\)</div>
-                        <div class="formula-desc">95% Service level buffer against historical volatility.</div>
-                    </div>
-                    <div class="formula-card">
-                        <div class="formula-title">Reorder Point ($ROP$)</div>
-                        <div id="formula-rop-val" class="formula-val text-amber">-- units</div>
-                        <div class="formula-math">\(ROP = (\bar{d}_{\text{forecast}} \times L) + SS\)</div>
-                        <div class="formula-desc">Threshold that triggers automated replenishment alert.</div>
-                    </div>
-                    <div class="formula-card">
-                        <div class="formula-title">Economic Order Quantity ($EOQ$)</div>
-                        <div id="formula-eoq-val" class="formula-val text-emerald">-- units</div>
-                        <div class="formula-math">\(EOQ = \sqrt{\frac{2 \times D \times S}{H}}\)</div>
-                        <div class="formula-desc">Optimal batch size balancing order & holding costs.</div>
+
+            <div class="drawer-body">
+                <!-- Status Banner -->
+                <div id="drawer-risk-banner" class="drawer-banner banner-high">
+                    <span class="banner-icon">⚠️</span>
+                    <div>
+                        <strong id="drawer-risk-title">HIGH STOCKOUT RISK</strong>
+                        <div id="drawer-risk-sub" class="text-xs">Current stock is below Reorder Point ($ROP$). Immediate replenishment required.</div>
                     </div>
                 </div>
 
-                <!-- Chart Section -->
-                <div class="chart-container-box">
-                    <div class="chart-header">
-                        <h4>Demand History (Last 90 Days) vs Lead-Time ML Forecast Curve</h4>
-                        <div class="chart-legend-pills">
-                            <span class="pill pill-history">Historical Demand</span>
-                            <span class="pill pill-forecast">ML Recursive Forecast</span>
-                            <span class="pill pill-rop">ROP Threshold</span>
-                            <span class="pill pill-ss">Safety Stock</span>
-                        </div>
+                <!-- Spec Grid Cards -->
+                <div class="drawer-spec-grid">
+                    <div class="spec-card">
+                        <span class="spec-label">Current Stock</span>
+                        <strong id="drawer-stock-val" class="spec-val">--</strong>
                     </div>
-                    <div class="chart-canvas-wrapper">
-                        <canvas id="forecastChart"></canvas>
+                    <div class="spec-card">
+                        <span class="spec-label">Lead Time</span>
+                        <strong id="drawer-lt-val" class="spec-val">-- days</strong>
+                    </div>
+                    <div class="spec-card">
+                        <span class="spec-label">Safety Stock ($SS$)</span>
+                        <strong id="drawer-ss-val" class="spec-val text-rose">--</strong>
+                    </div>
+                    <div class="spec-card">
+                        <span class="spec-label">Reorder Point ($ROP$)</span>
+                        <strong id="drawer-rop-val" class="spec-val text-amber">--</strong>
+                    </div>
+                    <div class="spec-card">
+                        <span class="spec-label">EOQ Batch</span>
+                        <strong id="drawer-eoq-val" class="spec-val text-emerald">--</strong>
+                    </div>
+                    <div class="spec-card">
+                        <span class="spec-label">Order Recommendation</span>
+                        <strong id="drawer-order-val" class="spec-val text-emerald">--</strong>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Interactive Stock Adjustment Modal -->
-    <div id="stock-modal" class="modal-backdrop hidden">
-        <div class="modal-content glass modal-sm">
-            <div class="modal-header">
-                <h3>Adjust Stock Level</h3>
-                <button id="stock-modal-close" class="modal-close-btn">&times;</button>
+                <!-- Interactive Forecast Chart -->
+                <div class="drawer-chart-section">
+                    <h4>90-Day Demand History vs GBDT Lead-Time Forecast</h4>
+                    <div class="drawer-chart-container">
+                        <canvas id="drawerChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="drawer-footer-actions">
+                    <button id="drawer-btn-order" class="btn btn-emerald full-width">
+                        <span>🛒 Place Reorder (${EOQ} Units)</span>
+                    </button>
+                </div>
             </div>
-            <div class="modal-body">
-                <form id="stock-form">
-                    <input type="hidden" id="edit-mat-id">
-                    <div class="form-group">
-                        <label>Material ID</label>
-                        <input type="text" id="edit-mat-display" disabled class="form-control">
-                    </div>
-                    <div class="form-group">
-                        <label for="edit-mat-stock">New Stock Level (units)</label>
-                        <input type="number" id="edit-mat-stock" min="0" required class="form-control">
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" id="btn-cancel-stock" class="btn btn-ghost">Cancel</button>
-                        <button type="submit" class="btn btn-emerald">Save & Recalculate</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+        </aside>
     </div>
 
     <script src="app.js"></script>

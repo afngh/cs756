@@ -33,6 +33,7 @@ def get_pipeline_data():
     results = []
     high_risk_count = 0
     total_reorder_qty = 0
+    total_stock_units = 0
     
     for mat_id in materials:
         model_path = os.path.join(models_dir, f"{mat_id}_baseline.pkl")
@@ -84,6 +85,7 @@ def get_pipeline_data():
         rec['last_date'] = last_date.strftime("%Y-%m-%d")
         
         results.append(rec)
+        total_stock_units += current_stock
         if rec['stockout_risk'] == "HIGH":
             high_risk_count += 1
         total_reorder_qty += rec['recommended_order_qty']
@@ -93,6 +95,8 @@ def get_pipeline_data():
             "total_materials": len(results),
             "high_risk_count": high_risk_count,
             "total_reorder_qty": total_reorder_qty,
+            "total_stock_units": total_stock_units,
+            "avg_lead_time": round(np.mean([r['lead_time'] for r in results]), 1),
             "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         },
         "materials": results
@@ -179,7 +183,6 @@ class PipelineRequestHandler(SimpleHTTPRequestHandler):
         super().__init__(*args, directory=STATIC_DIR, **kwargs)
 
     def end_headers(self):
-        # Allow CORS & prevent caching for dynamic API responses
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
         self.send_header('Access-Control-Allow-Headers', 'Content-Type')
