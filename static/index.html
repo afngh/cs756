@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Replenishment Health Dashboard | CS2026-756</title>
+    <!-- Modern Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <!-- Chart.js for visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Header Navigation -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo-badge">
+                    <span class="logo-icon">📦</span>
+                </div>
+                <div>
+                    <h1 class="app-title">Replenishment Health Dashboard</h1>
+                    <div class="app-subtitle">
+                        <span>CodeSprint 2026 Hackathon #167</span>
+                        <span class="dot-separator">•</span>
+                        <span>Team CS2026-756</span>
+                        <span class="dot-separator">•</span>
+                        <span>Audisankara Deemed to be University</span>
+                    </div>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="status-indicator">
+                    <span class="pulse-dot"></span>
+                    <span class="status-text">Continuous Review Pipeline Active</span>
+                </div>
+                <button id="btn-refresh" class="btn btn-secondary">
+                    <span class="icon">🔄</span> Refresh Data
+                </button>
+            </div>
+        </header>
+
+        <!-- Executive Summary KPI Cards -->
+        <section class="kpi-grid">
+            <div class="kpi-card glass">
+                <div class="kpi-icon icon-cyan">📊</div>
+                <div class="kpi-content">
+                    <span class="kpi-label">Monitored Raw Materials</span>
+                    <div id="kpi-total-mat" class="kpi-value">--</div>
+                    <span class="kpi-subtext">3-Layer Optimization Pipeline</span>
+                </div>
+            </div>
+            <div class="kpi-card glass warning-glow">
+                <div class="kpi-icon icon-rose">⚠️</div>
+                <div class="kpi-content">
+                    <span class="kpi-label">High Stockout Risk Items</span>
+                    <div id="kpi-high-risk" class="kpi-value text-rose">--</div>
+                    <span class="kpi-subtext">Stock < Reorder Point (ROP)</span>
+                </div>
+            </div>
+            <div class="kpi-card glass">
+                <div class="kpi-icon icon-emerald">🛒</div>
+                <div class="kpi-content">
+                    <span class="kpi-label">Total Reorder Qty Needed</span>
+                    <div id="kpi-reorder-qty" class="kpi-value text-emerald">--</div>
+                    <span class="kpi-subtext">Optimized via EOQ Formula</span>
+                </div>
+            </div>
+            <div class="kpi-card glass">
+                <div class="kpi-icon icon-violet">🧠</div>
+                <div class="kpi-content">
+                    <span class="kpi-label">Forecasting Engine</span>
+                    <div class="kpi-value text-violet">GBDT + Lags</div>
+                    <span class="kpi-subtext">Recursive Multi-step Forecast</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Dashboard Actions & Filter Bar -->
+        <section class="toolbar glass">
+            <div class="toolbar-left">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="input-search" placeholder="Search Material ID (e.g. MAT_01)...">
+                </div>
+                <div class="filter-tabs">
+                    <button class="tab-btn active" data-filter="all">All Items (<span id="count-all">0</span>)</button>
+                    <button class="tab-btn filter-high" data-filter="HIGH">High Risk (<span id="count-high">0</span>)</button>
+                    <button class="tab-btn filter-low" data-filter="LOW">Low Risk (<span id="count-low">0</span>)</button>
+                </div>
+            </div>
+            <div class="toolbar-right">
+                <button id="btn-simulate-shortage" class="btn btn-warning">
+                    <span class="icon">⚡</span> Simulate Shortage (MAT_01)
+                </button>
+                <button id="btn-reset-data" class="btn btn-ghost">
+                    <span class="icon">🎲</span> Reset Synthetic History
+                </button>
+            </div>
+        </section>
+
+        <!-- Main Data Table Card -->
+        <main class="table-card glass">
+            <div class="table-header-bar">
+                <h2>Raw Material Replenishment Recommendations</h2>
+                <div class="timestamp-badge">
+                    <span>Last Updated: </span>
+                    <strong id="last-updated-time">--:--:--</strong>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Material ID</th>
+                            <th>Lead Time</th>
+                            <th>Current Stock</th>
+                            <th>Avg Daily Use</th>
+                            <th>Safety Stock ($SS$)</th>
+                            <th>Reorder Point ($ROP$)</th>
+                            <th>EOQ</th>
+                            <th>Rec. Order Qty</th>
+                            <th>Stockout Risk</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="materials-tbody">
+                        <tr>
+                            <td colspan="10" class="loading-cell">
+                                <div class="spinner"></div>
+                                <span>Loading ML Demand Forecast Pipeline...</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Material Details & Analytics Modal -->
+    <div id="forecast-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass">
+            <div class="modal-header">
+                <div>
+                    <h3 id="modal-title" class="modal-title">Material Analytics & Forecast</h3>
+                    <div id="modal-subtitle" class="modal-subtitle">MAT_01 • Lead Time: 7 days</div>
+                </div>
+                <button id="modal-close" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Mathematical Formula Cards Grid -->
+                <div class="formula-cards-grid">
+                    <div class="formula-card">
+                        <div class="formula-title">Safety Stock ($SS$)</div>
+                        <div id="formula-ss-val" class="formula-val">-- units</div>
+                        <div class="formula-math">\(SS = 1.645 \times \sigma_{90} \times \sqrt{L}\)</div>
+                        <div class="formula-desc">95% Service level buffer against historical volatility.</div>
+                    </div>
+                    <div class="formula-card">
+                        <div class="formula-title">Reorder Point ($ROP$)</div>
+                        <div id="formula-rop-val" class="formula-val text-amber">-- units</div>
+                        <div class="formula-math">\(ROP = (\bar{d}_{\text{forecast}} \times L) + SS\)</div>
+                        <div class="formula-desc">Threshold that triggers automated replenishment alert.</div>
+                    </div>
+                    <div class="formula-card">
+                        <div class="formula-title">Economic Order Quantity ($EOQ$)</div>
+                        <div id="formula-eoq-val" class="formula-val text-emerald">-- units</div>
+                        <div class="formula-math">\(EOQ = \sqrt{\frac{2 \times D \times S}{H}}\)</div>
+                        <div class="formula-desc">Optimal batch size balancing order & holding costs.</div>
+                    </div>
+                </div>
+
+                <!-- Chart Section -->
+                <div class="chart-container-box">
+                    <div class="chart-header">
+                        <h4>Demand History (Last 90 Days) vs Lead-Time ML Forecast Curve</h4>
+                        <div class="chart-legend-pills">
+                            <span class="pill pill-history">Historical Demand</span>
+                            <span class="pill pill-forecast">ML Recursive Forecast</span>
+                            <span class="pill pill-rop">ROP Threshold</span>
+                            <span class="pill pill-ss">Safety Stock</span>
+                        </div>
+                    </div>
+                    <div class="chart-canvas-wrapper">
+                        <canvas id="forecastChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Stock Adjustment Modal -->
+    <div id="stock-modal" class="modal-backdrop hidden">
+        <div class="modal-content glass modal-sm">
+            <div class="modal-header">
+                <h3>Adjust Stock Level</h3>
+                <button id="stock-modal-close" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="stock-form">
+                    <input type="hidden" id="edit-mat-id">
+                    <div class="form-group">
+                        <label>Material ID</label>
+                        <input type="text" id="edit-mat-display" disabled class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-mat-stock">New Stock Level (units)</label>
+                        <input type="number" id="edit-mat-stock" min="0" required class="form-control">
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" id="btn-cancel-stock" class="btn btn-ghost">Cancel</button>
+                        <button type="submit" class="btn btn-emerald">Save & Recalculate</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
