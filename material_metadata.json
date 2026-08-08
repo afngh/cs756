@@ -1,0 +1,62 @@
+{
+    "MAT_01": {
+        "base_demand": 400,
+        "lead_time": 7
+    },
+    "MAT_02": {
+        "base_demand": 446,
+        "lead_time": 3
+    },
+    "MAT_03": {
+        "base_demand": 293,
+        "lead_time": 6
+    },
+    "MAT_04": {
+        "base_demand": 257,
+        "lead_time": 3
+    },
+    "MAT_05": {
+        "base_demand": 439,
+        "lead_time": 3
+    },
+    "MAT_06": {
+        "base_demand": 677,
+        "lead_time": 9
+    },
+    "MAT_07": {
+        "base_demand": 656,
+        "lead_time": 6
+    },
+    "MAT_08": {
+        "base_demand": 282,
+        "lead_time": 8
+    },
+    "MAT_09": {
+        "base_demand": 870,
+        "lead_time": 8
+    },
+    "MAT_10": {
+        "base_demand": 294,
+        "lead_time": 8
+    },
+    "MAT_11": {
+        "base_demand": 239,
+        "lead_time": 3
+    },
+    "MAT_12": {
+        "base_demand": 323,
+        "lead_time": 5
+    },
+    "MAT_13": {
+        "base_demand": 393,
+        "lead_time": 10
+    },
+    "MAT_14": {
+        "base_demand": 119,
+        "lead_time": 3
+    },
+    "MAT_15": {
+        "base_demand": 782,
+        "lead_time": 9
+    }
+}
