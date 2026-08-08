@@ -1,6 +1,6 @@
 import logging
 import os
-from flask import Flask
+from flask import Flask, render_template
 from flask_cors import CORS
 
 from api.inventory import inventory_bp
@@ -16,6 +16,11 @@ def create_app():
     )
 
     app.register_blueprint(inventory_bp)
+
+    @app.route("/")
+    def index():
+        return render_template("index.html")
+
     return app
 
 

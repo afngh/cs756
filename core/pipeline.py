@@ -4,7 +4,7 @@ import joblib
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-import inventory_logic
+from core import inventory_logic
 
 def simulate_shortage(material_id, drop_to_pct=0.1):
     """
@@ -27,25 +27,6 @@ def simulate_shortage(material_id, drop_to_pct=0.1):
     df.to_csv(data_path, index=False)
     print(f"[simulate_shortage] Reduced latest stock of {material_id} from {old_stock} to {new_stock}.")
 
-def run_pipeline(data_path="inventory_data.csv", metadata_path="material_metadata.json", models_dir="models"):
-    # 1. Load configuration and dataset
-    if not os.path.exists(data_path):
-        raise FileNotFoundError(f"Dataset '{data_path}' not found. Run generate_data.py first.")
-    if not os.path.exists(metadata_path):
-        raise FileNotFoundError(f"Metadata '{metadata_path}' not found. Run generate_data.py first.")
-        
-    with open(metadata_path, 'r') as f:
-        metadata = json.load(f)
-        
-    df = pd.read_csv(data_path)
-    df['date'] = pd.to_datetime(df['date'])
-    
-    materials = sorted(df['material_id'].unique())
-    recommendations = []
-    
-    print("Running inventory optimization pipeline...")
-    print(f"Dataset date range: {df['date'].min().strftime('%Y-%m-%d')} to {df['date'].max().strftime('%Y-%m-%d')}")
-    print("-" * 80)
     
 def forecast_demand(material_id, historical_usage_30, lead_time_days, models_dir="models", reference_date=None):
     """
@@ -197,7 +178,7 @@ def run_pipeline(data_path="inventory_data.csv", metadata_path="material_metadat
 
 if __name__ == "__main__":
     # Ensure fresh data is generated
-    import generate_data
+    from core import generate_data
     generate_data.generate_synthetic_data()
     
     # Simulate shortage on MAT_01
